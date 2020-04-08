@@ -12,12 +12,13 @@ def seq_aac(seq, raa, k=1, gap=0, lam=0):
     :param lam: 
     :return:
     """
-    def three_f(idx, seq, k, gap, lam):
-        a = (seq[idx + idx*gap + (lam+1)*i] for i in range(k) 
-             if (idx + idx*gap + (lam+1)*i) < len(seq))
+
+    def three_f(idx, k, gap, lam, seq_dic):
+        a = (seq_dic.get(idx+idx*gap+(lam+1)*i, '') for i in range(k))
         return ''.join(a)
+    seq_dic = {i: v for i,v in enumerate(seq)}
     aa = [''.join(aa) for aa in product(raa, repeat=k)]
-    f3 = partial(three_f, seq=seq, gap=gap, k=k, lam=lam)
+    f3 = partial(three_f, gap=gap, k=k, lam=lam, seq_dic=seq_dic)
     aa_list = [f3(i) for i in range(len(seq))]
     aa_list = [i for i in aa_list if len(i) ==k]
     aa_dict = Counter(aa_list)
@@ -25,4 +26,4 @@ def seq_aac(seq, raa, k=1, gap=0, lam=0):
     aa_fre = [aa_dict[i] / count for i in aa]
     return aa_fre
 
-# TODO - add other sequence feature
+#TODO - add other sequence feature
