@@ -425,7 +425,8 @@ class MyArgumentParser(argparse.ArgumentParser):
  
 
 def command_parser():
-    parser = MyArgumentParser(description='reduce amino acids toolkit', fromfile_prefix_chars='@', conflict_handler='resolve')
+    parser = MyArgumentParser(description='reduce amino acids toolkit', 
+                                fromfile_prefix_chars='@', conflict_handler='resolve')
     subparsers = parser.add_subparsers(help='sub-command help')
 
     parser_v = subparsers.add_parser('view', add_help=False, help='view reduced amino acids alphabet')

@@ -179,7 +179,7 @@ def batch_extract(in_dirs, out_dir, k, gap, lam, n_jobs=1):
 
 def dic2array(result_dic, key='OA', cls=0):
     acc_ls = []  # all type acc
-    type_ls = [type_id for type_id in result_dic.keys() if type_id != "naa"]
+    type_ls = [type_id for type_id in result_dic.keys()]
     type_ls.sort(key=lambda x: int(x[4:]))
     all_score_array = np.zeros([len(type_ls), 19])
     for idx, ti in enumerate(type_ls):
@@ -341,13 +341,11 @@ def metric_dict2json(all_metric_dic, path):
         result_dic.setdefault(type_dir.name, {})
         for size_dir, cv_metric_dic in zip(type_dir.iterdir(), cv_metric_ls):
             metric_dic = mean_metric(cv_metric_dic)
-            if type_dir.name == "naa":
-                naa_metric = metric_dic
-            else:
-                size_ = size_dir.name.split("-")[0]
-                result_dic[type_dir.name][size_] = metric_dic
-    for type_key in result_dic:
-        result_dic[type_key]["20"] = naa_metric
+            size_ = size_dir.name.split("-")[0]
+            result_dic[type_dir.name][size_] = metric_dic
+    naa_metric = result_dic.pop('naa', {})
+    if naa_metric:
+        [result_dic[tk].update(naa_metric) for tk in result_dic]
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(result_dic, f, indent=4)
 
