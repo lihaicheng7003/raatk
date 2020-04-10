@@ -301,7 +301,7 @@ def parse_roc(args, sub_parser):
     parser.add_argument('-cv', type=int, default=5, help='cross validation fold')
     me_group = parser.add_mutually_exclusive_group()
     me_group.add_argument('-m', '--model', help='model')
-    me_group.add_argument('-clf', '--clf', choices=['svm', 'rf', 'knn'], 
+    me_group.add_argument('-clf', '--clf', choices=['svm', 'rf', 'knn'], default='svm',
                                 help='classifier selection')
     fmt_choices = ['eps', 'pdf', 'png', 'ps', 'raw', 'rgba', 'svg', 'txt']
     parser.add_argument('-fmt', '--format', default="png",
