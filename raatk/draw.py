@@ -86,3 +86,23 @@ def p_fs(x_trick, y_trick, out, **kwargs):
         plt.text(best_n, max_acc + 0.002, f'{best_n}, {max_acc:.4f}',
                 ha='center', va='bottom', fontsize=6, fontweight='bold')
     plt.savefig(out, dpi=1000)
+
+def visual_feature(x, y, out, labels=None):
+    plt.figure()
+    colors = ['navy', 'turquoise', 'darkorange', 'blue', 'grey', 'red']
+    labels = labels if labels else np.unique(y).astype(int)
+    for color, i, target_name in zip(colors, np.unique(y), labels):
+        plt.scatter(x[y == i, 0], x[y == i, 1], alpha=.8, color=color,
+                    label=target_name)
+    plt.legend(loc='best', shadow=False, scatterpoints=1)
+    plt.savefig(out, dpi=1000)
+
+def visual_feature_3d(x, y, out, labels=None):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    markers = ['o', '^', '1', '*', '+', 'x', '.','D']
+    for i in np.unique(y).astype(int):
+        x1, x2, x3 = x[y == i, 0], x[y == i, 1], x[y == i, 2]
+        ax.scatter(x1, x2, x3, marker=markers[i], label=i)
+    ax.legend(loc='best')
+    plt.savefig(out, dpi=1000)
