@@ -9,12 +9,14 @@ from concurrent import futures
 import joblib
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import Normalizer
+from sklearn.preprocessing import Normalizer, StandardScaler
 from sklearn.model_selection import train_test_split
 from joblib import Parallel, delayed
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+
 
 try:
     from . import draw
@@ -27,8 +29,8 @@ except ImportError:
 
 
 
-BASE_PATH = os.path.dirname(__file__)
-RAA_DB = os.path.join(BASE_PATH, 'nr_raa_data.db')
+BASE_PATH = Path(__file__).parent
+RAA_DB = BASE_PATH / 'nr_raa_data.db'
 NAA = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 
        'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
 
@@ -186,7 +188,7 @@ def dic2array(result_dic, key='OA', cls=0):
         type_ = result_dic[ti]
         score_size_ls = []
         for size in range(2, 21):
-            key_scores = type_.get(str(size), {key: 0}).get(key)
+            key_scores = type_.get(str(size), {key: 0}).get(key, 0)
             score = key_scores[cls] if isinstance(key_scores, list) else key_scores
             score_size_ls.append(score)
         all_score_array[idx] = score_size_ls
@@ -264,7 +266,7 @@ def load_data(file_data, label_exist=True, normal=False): ## file for data (x,y)
     if isinstance(file_data, (tuple, list)):
         if all([isinstance(i, np.ndarray) for i in file_data]):
             x, y = file_data
-    elif os.path.isfile(str(file_data)):
+    elif Path(str(file_data)).is_file():
         data = np.genfromtxt(file_data, delimiter=',')
         if label_exist:
             x, y = data[:, 1:], data[:, 0]
@@ -434,4 +436,11 @@ def exist_file(*file_path):
             print("File not found!")
             exit()
 
-
+#TODO add other method
+def feature_reduction(x, y, n_components=2):
+    from sklearn.pipeline import make_pipeline
+    nca = make_pipeline(Normalizer(),
+            NeighborhoodComponentsAnalysis(init='auto',
+                            n_components=n_components, random_state=1))
+    rx = nca.fit_transform(x,y)
+    return rx, y
