@@ -441,11 +441,15 @@ def parse_split(args, sub_parser):
 
 # TODO
 def sub_transfer(args):
-    pass
+    for file in args.file:
+        ul.fmt_transfer(Path(file), args.format)
 
 def parse_transfer(args, sub_parser):
     parser = sub_parser.add_parser('transfer', add_help=False, prog='raatk transfer')
     parser.add_argument('-h', '--help', action='help')
+    parser.add_argument('file', nargs='+', help='file path')
+    parser.add_argument('-fmt', '--format', choices=['arff'], default='arff',
+                         help='file path')
     parser.set_defaults(func=sub_transfer)
     transfer_args = parser.parse_args(args)
     transfer_args.func(transfer_args)

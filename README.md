@@ -1,5 +1,6 @@
 # RAATK
-A command line toolkit for reducing amino acid sequence and extracting sequence feature, and also using for evaluating the different amino acid alphabets and constructing sequence classifier. 
+
+RAATK: A Python-based reduce amino acid toolkit of machine learning for protein sequence level inference
 
 Installation
 ------------
@@ -12,6 +13,11 @@ or
 ``` 
 $ pip install git+https://github.com/huang-sh/raatk.git@master -U
 ```
+All commands within paper can be tested by running demo.sh in demo directory after installing RAATK
+```
+$ ./demo.sh
+```
+
  Function
  ------------
 

@@ -19,7 +19,7 @@ raatk eval k3/type2/10-ARNCQHIFPW.csv -cv -1 -c 2 -g 0.5 -o k3-t2s10.txt
 raatk plot k3-eval.json -o k3-p
 
 # ROC evaluation
-raatk k3/type2/10-ARNCQHIFPW.csv -clf svm -cv 5 -c 2 -g 0.5 -o roc
+raatk roc k3/type2/10-ARNCQHIFPW.csv -clf svm -cv 5 -c 2 -g 0.5 -o roc
 
 # feature selection
 raatk ifs k3/type2/10-ARNCQHIFPW.csv -s 2 -clf svm -cv 5 -c 2 -g 0.5 -o ifs
