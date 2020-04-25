@@ -151,13 +151,12 @@ def sub_hpo(args):
 
 #TODO
 def parse_hpo(args, sub_parser):
-    pass
-    # parser = sub_parser.add_parser('hpo', add_help=False, prog='raatk hpo')
-    # parser.add_argument('-h', '--help', action='help')
-    # parser.add_argument('file', help='feature file for hpyper-parameter optimization')
-    # parser.add_argument('-clf', '--clf', default='svm', choices=['svm', 'rbf', 'knn'],
-    #                                 help='classifier selection')
-    # parser.add_argument('-jobs','--n_jobs', type=int, help='the number of parallel jobs to run')
+    parser = sub_parser.add_parser('hpo', add_help=False, prog='raatk hpo')
+    parser.add_argument('-h', '--help', action='help')
+    parser.add_argument('file', help='feature file for hpyper-parameter optimization')
+    parser.add_argument('-clf', '--clf', default='svm', choices=['svm', 'rbf', 'knn'],
+                                    help='classifier selection')
+    parser.add_argument('-jobs','--n_jobs', type=int, help='the number of parallel jobs to run')
 
     # knn = parser.add_argument_group('KNN', description='K-nearest neighbors classifier')
     # knn.add_argument('--n_neighbors', type=int, nargs='+',
@@ -170,14 +169,16 @@ def parse_hpo(args, sub_parser):
     #                     help='leaf size passed to BallTree or KDTree')
 
     # svm = parser.add_argument_group('SVM', description='Parameters for SVM classifier')
-    # svm.add_argument('-c', '--C-range',  nargs='+', required=True, type=int,
+    # svm.add_argument('-c', '--C-range',  nargs='+', type=int,
     #                         help='regularization parameter value range [start, stop, [num]]')
-    # svm.add_argument('-g', '--gamma-range', nargs='+', required=True, type=int,
+    # svm.add_argument('-g', '--gamma-range', nargs='+', type=int,
     #                         help='Kernel coefficient value range [start, stop, [num]]')
-    # svm.add_argument('--kernel', nargs='+', required=True, choices=['rbf', 'linear'],
+    # svm.add_argument('--kernel', nargs='+', choices=['rbf', 'linear'],
     #                         help='kernel function')
     
-    # parser.set_defaults(func=sub_hpo)
+    parser.set_defaults(func=sub_hpo)
+    args.n_jobs = 233
+    print(args.n_jobs)
     # hpo_args = parser.parse_args(args)
     # hpo_args.func(hpo_args)
 
@@ -327,7 +328,7 @@ def sub_ifs(args):
             mean_mt = ul.mean_metric
             acc_ls = [0] + [mean_mt(i)['acc'] for i in result_ls]
             max_acc = max(acc_ls)
-            best_n = acc_ls.index(max_acc) * step
+            best_n = x.shape[1] if max_acc==acc_ls[-1] else acc_ls.index(max_acc)*step
             draw.p_fs(x_tricks, acc_ls, out + '.png', max_acc=max_acc, best_n=best_n)
             best_x = x[:, sort_idx[:best_n]]
             best_file =  out + '_best.csv'
@@ -373,6 +374,37 @@ def parse_plot(args, sub_parser):
     parser.set_defaults(func=sub_plot)
     plot_args = parser.parse_args(args)
     plot_args.func(plot_args)
+
+def sub_fv(args):
+    n = args.n
+    data = np.genfromtxt(args.file, delimiter=',')
+    rx, y = ul.feature_reduction(data[:, 1:], data[:, 0], n_components=n)
+    if len(args.label) == len(np.unique(y)):
+        labels = args.label
+    else:
+        labels = None
+    out = f'{args.output}.{args.format}'
+    if n == 2:
+        draw.visual_feature(rx, y, out, labels=labels)
+    elif n == 3:
+        draw.visual_feature_3d(rx, y, out, labels=labels)
+
+def parse_fv(args, sub_parser):
+    parser = sub_parser.add_parser('fv', add_help=False, prog='raatk fv')
+    parser.add_argument('-h', '--help', action='help')
+    parser.add_argument('file', help='the result json file')
+    fmt_choices = ['eps', 'pdf', 'png', 'ps', 'raw', 'rgba', 'svg']
+    parser.add_argument('-fmt', '--format', default="png",
+                            choices=fmt_choices, help='figure format')
+    # parser.add_argument('-dpi', default=1000, type=int, help='figure format')
+    parser.add_argument('-lb', '--label', nargs='+', default=[], help='feature labels')
+    parser.add_argument('-n', default=2, type=int, choices=[2, 3], help='n components')
+    parser.add_argument('-m', '--method', default='nca', choices=[2, 3],
+                                         help='reduction method')
+    parser.add_argument('-o', '--output', required=True, help='output path')
+    parser.set_defaults(func=sub_fv)
+    fv_args = parser.parse_args(args)
+    fv_args.func(fv_args)
 
 def sub_merge(args):
     mix_data = ul.merge_feature_file(args.label, args.file)
@@ -449,6 +481,8 @@ def command_parser():
     parser_f.set_defaults(func=parse_ifs)
     parser_p = subparsers.add_parser("plot", add_help=False, help='visualization of evaluation result')
     parser_p.set_defaults(func=parse_plot) 
+    parser_p = subparsers.add_parser("fv", add_help=False, help='high-dimensional feature visualization')
+    parser_p.set_defaults(func=parse_fv)
     parser_m = subparsers.add_parser('merge', add_help=False, help='merge files into one')
     parser_m.set_defaults(func=parse_merge)
     parser_s = subparsers.add_parser('split', add_help=False, help='split file data')
