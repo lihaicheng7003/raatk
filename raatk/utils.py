@@ -55,7 +55,7 @@ def check_aa(aa):
     
 # TODO - query optimization
 def reduce_query(type_id, size):
-    conn = sqlite3.connect(RAA_DB)
+    conn = sqlite3.connect(str(RAA_DB))
     cursor = conn.cursor()
     cursor.execute('select r.type_id, c.size, c.scheme, r.method from raa r \
                 inner join cluster c on r.type_id=c.type_id \
