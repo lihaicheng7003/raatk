@@ -76,24 +76,29 @@ def cv_roc_curve_plot(clf, x, y, cv):
     ax.fill_between(mean_fpr, tprs_lower, tprs_upper, color='grey', alpha=.2,
                     label=r'$\pm$ 1 std. dev.')
     ax.set(xlim=[-0.05, 1.05], ylim=[-0.05, 1.05],
-           title="Receiver operating characteristic example")
+           title="Receiver operating characteristic")
     ax.legend(loc="lower right")
     name =  clf.__class__.__name__
     viz = RocCurveDisplay(mean_fpr, mean_tpr, mean_auc, name)
     return viz
 
 def loo_roc_curve_plot(clf, x, y):
-	from functools import partial
-	def loo_proba(i, x, y, clf):
-		clf.fit(x.drop(i), y.drop(i))
-		return clf.predict_proba(x.loc[[i]])[0, 1]
-	func_ = partial(loo_proba, x=x, y=y, clf=clf)
-	y_proba = [func_(i) for i in X.index]
-	fpr, tpr, _ = roc_curve(yt, yp)
-	roc_auc = auc(fpr, tpr)
-	name =  clf.__class__.__name__
-	viz = RocCurveDisplay(fpr, tpr, roc_auc, name)
-	return viz.plot(name=name)
+    from functools import partial
+    def loo_proba(i, x, y, clf):
+        idx = list(range(len(y)))
+        idx.pop(i)
+        clf.fit(x[idx,:], y[idx])
+        return clf.predict_proba(x[[i],:])[0, 1]
+    func_ = partial(loo_proba, x=x, y=y, clf=clf)
+    y_proba = [func_(i) for i in range(len(y))]
+    fpr, tpr, _ = roc_curve(y, y_proba)
+    roc_auc = auc(fpr, tpr)
+    name =  clf.__class__.__name__
+    ax = plt.figure().gca()
+    ax.plot([0, 1], [0, 1], linestyle='--', lw=2, color='r',
+                        label='Chance', alpha=.8)
+    viz = RocCurveDisplay(fpr, tpr, roc_auc, name)
+    return viz.plot(name=name, ax=ax)
 
 def roc_curve_plot(clf, x, y):
     y_prob = clf.predict_proba(x)[:, 1]
