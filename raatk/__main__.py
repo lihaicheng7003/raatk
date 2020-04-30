@@ -10,6 +10,7 @@ import os
 import json
 import argparse
 from pathlib import Path
+from collections import defaultdict
 
 import numpy as np
 
@@ -40,6 +41,7 @@ def parse_view(args, sub_parser):
                           choices=list([i for i in range(1, 75)]), help='type id')
     parser_v.add_argument('-s', '--size', nargs='+', type=int, required=True, 
                           choices=list([i for i in range(2, 20)]), help='reduce size')
+    parser_v.add_argument('--visual', action='store_true', help='visualization')
     parser_v.set_defaults(func=sub_view)
     view_args = parser_v.parse_args(args)
     view_args.func(view_args)
@@ -91,11 +93,12 @@ def parse_reduce(args, sub_parser):
     reduce_args.func(reduce_args)
 
 def sub_extract(args):
+    iscount = args.count
     k, gap, lam, n_jobs = args.kmer, args.gap, args.lam, args.process
     if args.directory:
         out = Path(args.output[0])
         out.mkdir(exist_ok=True)
-        ul.batch_extract(args.file, out, k, gap, lam, n_jobs=n_jobs)
+        ul.batch_extract(args.file, out, k, gap, lam, n_jobs=n_jobs,count=iscount)
     else:
         if args.raa:
             raa = list(args.raa) 
@@ -104,7 +107,7 @@ def sub_extract(args):
         xy_ls = []
         for idx, file in enumerate(args.file):
             feature_file = Path(file)
-            xy = ul.extract_feature(feature_file, raa, k, gap, lam)
+            xy = ul.extract_feature(feature_file, raa, k, gap, lam, count=iscount)
             if args.index:
                 fea_idx = np.genfromtxt(args.index, delimiter='\n').astype(int)
                 xy = xy[:, fea_idx]
@@ -137,6 +140,7 @@ def parse_extract(args, sub_parser):
     parser_ex.add_argument('-p', '--process',type=int, choices=list([i for i in range(1, os.cpu_count())]),
                                  default=1, help='cpu number')
     parser_ex.add_argument('--label-f', action='store_false', help='feature label')
+    parser_ex.add_argument('--count', action='store_true', help='feature count')
     parser_ex.set_defaults(func=sub_extract)
     extract_args = parser_ex.parse_args(args)
     extract_args.func(extract_args)

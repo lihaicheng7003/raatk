@@ -3,6 +3,7 @@ import csv
 import json
 import sqlite3
 from pathlib import Path
+from itertools import chain
 from functools import partial
 from concurrent import futures
 
@@ -139,15 +140,15 @@ def batch_reduce(file, cluster_info, out_dir):
             type_id, size, cluster = to_do_map[i]
             print("done %s %s %s" % (type_id, size, cluster)) 
 
-def extract_feature(feature_file, raa, k, gap, lam):
+def extract_feature(feature_file, raa, k, gap, lam, count=False):
     with open(feature_file, "r") as rh:
         seqs = read_fasta(rh)
-        fea_func = partial(fea.seq_aac, raa=raa, k=k, gap=gap, lam=lam)
+        fea_func = partial(fea.seq_aac, raa=raa, k=k, gap=gap, lam=lam, count=count)
         seq_vec = np.array([fea_func(sq[1]) for sq in seqs])
     return seq_vec
             
 # TODO - IO optimization     
-def batch_extract(in_dirs, out_dir, k, gap, lam, n_jobs=1):
+def batch_extract(in_dirs, out_dir, k, gap, lam, n_jobs=1, count=False):
 
     def parse_filepath(in_dirs, out_dir):
         tps_iter = [Path(i).iterdir() for i in in_dirs]
@@ -161,21 +162,21 @@ def batch_extract(in_dirs, out_dir, k, gap, lam, n_jobs=1):
                 raa_str = szie_stem.split("-")[-1]
                 yield out, sfs, raa_str
 
-    def files_extract(raa, k, gap, lam, *files):
+    def files_extract(raa, k, gap, lam, count, *files):
         xy_ls = []
         for idx, file in enumerate(files):
-            xy = extract_feature(file, raa, k, gap, lam)
+            xy = extract_feature(file, raa, k, gap, lam, count=count)
             y = np.array([[idx]]*xy.shape[0])
             xy = np.hstack([y, xy])
             xy_ls.append(xy)
         new_xy = np.vstack(xy_ls)
         return new_xy
 
-    def feature2file(out, files, raa, k, gap, lam):
-        data = files_extract(raa, k, gap, lam, *files)
+    def feature2file(out, files, raa, k, gap, lam, count):
+        data = files_extract(raa, k, gap, lam, count, *files)
         np.savetxt(out, data, delimiter=",", fmt="%.6f")
 
-    extract_fun = partial(feature2file, k=k, gap=gap, lam=lam)
+    extract_fun = partial(feature2file, k=k, gap=gap, lam=lam, count=count)
     with Parallel(n_jobs=n_jobs) as pl:
         pl(delayed(extract_fun)(*paras) for paras in parse_filepath(in_dirs, out_dir))
 
