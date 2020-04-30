@@ -21,6 +21,10 @@ except ImportError:
 
 np.seterr(all='ignore')
 
+def grid_search1(clf):
+    grid = GridSearchCV(SVC(random_state=1), cv=5, n_jobs=-1, param_grid=param_grid)
+
+
 
 def grid_search(x, y, param_grid):
     grid = GridSearchCV(SVC(random_state=1), cv=5, n_jobs=-1, param_grid=param_grid)
@@ -32,11 +36,11 @@ def train(x, y, clf, out):
     model = clf.fit(x, y)
     joblib.dump(model, out)
 
-
+# its discarded
 def batch_train(in_dir, out_dir, C, gamma, n_job):
 
     def process_func(file, C, gamma):
-        x, y = ul.load_data(file, normal=True)
+        _, (x, y) = ul.load_data(file, normal=True)
         model = train(x, y, C, gamma)
         return model
     train_func = partial(process_func, C=C, gamma=gamma)
@@ -76,7 +80,7 @@ def evaluate(x, y, cv, clf):
 def batch_evaluate(in_dir, out_dir, cv, clf, n_job):
     
     def eval_(file, cv, clf):
-        x, y = ul.load_data(file, normal=True)
+        _, (x, y) = ul.load_data(file)
         metric_dic = evaluate(x, y, cv, clf)
         return metric_dic
         

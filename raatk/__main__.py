@@ -10,6 +10,7 @@ import os
 import json
 import argparse
 from pathlib import Path
+from itertools import product
 from collections import defaultdict
 
 import numpy as np
@@ -105,23 +106,27 @@ def sub_extract(args):
         else:
             raa = list(Path(args.file[0]).stem.split('-')[-1])
         xy_ls = []
+        aa_ls = [''.join(aa) for aa in product(raa, repeat=k)]
         for idx, file in enumerate(args.file):
             feature_file = Path(file)
             xy = ul.extract_feature(feature_file, raa, k, gap, lam, count=iscount)
             if args.index:
                 fea_idx = np.genfromtxt(args.index, delimiter='\n').astype(int)
                 xy = xy[:, fea_idx]
+                aa_ls = [aa_ls[i] for i in fea_idx]
             if args.label_f:
                 y = np.array([[idx]]*xy.shape[0])
                 xy = np.hstack([y, xy])
             xy_ls.append(xy)
+        aa_ls.insert(0, 'label') if args.label_f else 0
+        header = ','.join(aa_ls)
         if args.merge:
-            out = Path(args.output[0])
+            out = args.output[0]
             seq_mtx = np.vstack(xy_ls)
-            ul.write_array(Path(out), seq_mtx)
+            ul.write_array(Path(out), seq_mtx, header=header)
             exit()
         for idx, o in enumerate(args.output):
-            ul.write_array(Path(o), xy_ls[idx])
+            ul.write_array(Path(o), xy_ls[idx], header=header)
 
 def parse_extract(args, sub_parser):
     parser_ex = sub_parser.add_parser('extract', add_help=False, prog='raatk extract')
@@ -221,7 +226,7 @@ def clf_parser(parser):
 
 def sub_train(args):
     clf = ul.select_clf(args)
-    x, y = ul.load_data(args.file, normal=True)
+    _, (x, y) = ul.load_data(args.file)
     cp.train(x, y, clf, args.output)
 
 def parse_train(args, sub_parser):
@@ -240,7 +245,7 @@ def parse_train(args, sub_parser):
     train_args.func(train_args)
 
 def sub_predict(args):
-    x, _ = ul.load_data(args.file, label_exist=False, normal=True)
+    _, (x, _) = ul.load_data(args.file, label_exist=False)
     model = ul.load_model(args.model)
     y_pred, y_prob = cp.predict(x, model)
     if y_prob is None:
@@ -266,7 +271,7 @@ def sub_eval(args):
         result_json = args.output + ".json"
         ul.metric_dict2json(all_metric_dic, result_json)
     else:
-        x, y = ul.load_data(args.file, normal=True)
+        _, (x, y) = ul.load_data(args.file)
         metric_dic = cp.evaluate(x, y, args.cv, clf)
         ul.save_report(metric_dic, args.output + '.txt')
         # ul.k_roc_curve_plot(metric_dic['y_true'], metric_dic['y_prob'], args.output + '.png')       
@@ -289,7 +294,7 @@ def parse_eval(args, sub_parser):
     eval_args.func(eval_args)
 
 def sub_roc(args):
-    x, y = ul.load_data(args.file, normal=True)   
+    _, (x, y) = ul.load_data(args.file)
     if args.model:
         cv = None
         clf = ul.load_model(args.model)
@@ -325,7 +330,7 @@ def sub_ifs(args):
         pass
     else:
         for file, out in zip(args.file, args.output): 
-            x, y = ul.load_data(file)
+            names, (x, y) = ul.load_data(file, normal=False)
             result_ls, sort_idx = cp.feature_select(x, y, step, cv, clf, n_jobs)
             x_tricks = [i for i in range(0, x.shape[1], step)]
             x_tricks.append(x.shape[1])
@@ -336,7 +341,8 @@ def sub_ifs(args):
             draw.p_fs(x_tricks, acc_ls, out + '.png', max_acc=max_acc, best_n=best_n)
             best_x = x[:, sort_idx[:best_n]]
             best_file =  out + '_best.csv'
-            ul.write_array(best_file, y.reshape(-1, 1), best_x)
+            header = ','.join([names[0]]+[names[i+1] for i in sort_idx[:best_n]])
+            ul.write_array(best_file, y.reshape(-1, 1), best_x, header=header)
             xtricks_arr = np.array(x_tricks[:len(acc_ls)]).reshape(-1, 1)
             acc_arr = np.array(acc_ls).reshape(-1, 1)
             ul.write_array(out+".csv", xtricks_arr, acc_arr)
@@ -381,7 +387,7 @@ def parse_plot(args, sub_parser):
 
 def sub_fv(args):
     n = args.n
-    data = np.genfromtxt(args.file, delimiter=',')
+    data = np.genfromtxt(args.file, delimiter=',', skip_header=1, dtype=float)
     rx, y = ul.feature_reduction(data[:, 1:], data[:, 0], n_components=n)
     if len(args.label) == len(np.unique(y)):
         labels = args.label
@@ -411,8 +417,9 @@ def parse_fv(args, sub_parser):
     fv_args.func(fv_args)
 
 def sub_merge(args):
+    names, _ = ul.load_structured_data(args.file[0])[0]
     mix_data = ul.merge_feature_file(args.label, args.file)
-    ul.write_array(args.output, mix_data)
+    ul.write_array(args.output, mix_data, header=','.join(names))
 
 def parse_merge(args, sub_parser):
     parser = sub_parser.add_parser('merge', add_help=False, prog='raatk merge')
@@ -427,9 +434,10 @@ def parse_merge(args, sub_parser):
 def sub_split(args):
     ts = args.testsize
     if 0 < ts < 1:
-        data_train, data_test = ul.split_data(args.file, ts)
-        ul.write_array(f"{1-ts}_{args.output}", data_train)
-        ul.write_array(f"{ts}_{args.output}", data_test)
+        data_train, data_test, names = ul.split_data(args.file, ts)
+        header = ','.join(names)
+        ul.write_array(f"{1-ts}_{args.output}", data_train, header=header)
+        ul.write_array(f"{ts}_{args.output}", data_test, header=header)
     else:
         print("error")
 
