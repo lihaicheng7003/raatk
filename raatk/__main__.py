@@ -33,6 +33,16 @@ def sub_view(args):
         tpi, size, cluster, method = item
         info = f"type{tpi:<3}{size:<3}{cluster:<40}{method}"
         print(info)
+    if args.visual:
+        values.reverse()
+        cluster_dic = defaultdict(list)
+        tp_cluster = type_id = [i[2] for i in values]
+        type_id = [i[0] for i in values]
+        [cluster_dic[i[0]].append(i[2].split('-')) for i in values]
+        for ti, clusters in cluster_dic.items():
+            out = f'type{ti}.html'
+            clusters.insert(0, list(''.join(clusters[0])))
+            ul.plot_sankey(out, clusters, f'type{ti}')
 
 def parse_view(args, sub_parser):
     parser_v = sub_parser.add_parser('view', add_help=False, prog='raatk view',

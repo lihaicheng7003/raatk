@@ -14,13 +14,13 @@ setup(name='raatk',
         'matplotlib>=3.1.1',
         'scikit-learn>=0.22.1',
         'seaborn>=0.9.0',
-        
+        'plotly>=4.6.0',             
         ],
     entry_points={
         'console_scripts': [
         'raatk=raatk.__main__:command_parser',
             ]
         },
-    python_requires=">=3.5",
+    python_requires=">=3.6",
     include_package_data=True,
     zip_safe=True)

@@ -9,6 +9,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
+import plotly.graph_objects as go
 
 def p_univariate_density(acc, out):
     fig, ax = plt.subplots()
@@ -106,3 +107,26 @@ def visual_feature_3d(x, y, out, labels=None):
         ax.scatter(x1, x2, x3, marker=markers[i], label=i)
     ax.legend(loc='best')
     plt.savefig(out, dpi=1000)
+
+def sankey(label, source, target, value, out, title):
+    fig = go.Figure(
+        data=[
+            go.Sankey(
+                customdata=label,
+                orientation='h',
+                node = dict(
+                  pad = 15,
+                  thickness = 20,
+                  line = dict(color = "black", width=0.5),
+                  label = label,
+                  hovertemplate='%{label}'
+                        ),
+                link = dict(
+                  source = source,
+                  target = target,
+                  value = value
+                            ),
+                    ),
+        ]   )
+    fig.update_layout(title_text=f"Reduction alphabet of {title}", font_size=10)
+    fig.write_html(f'{out}.html')

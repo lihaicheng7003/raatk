@@ -471,3 +471,37 @@ def fmt_transfer(file, fmt='arff'):
             row = row.tolist()
             line = row[1:] + [f'class{int(row[0])}']
             fc.writerow(line)
+
+def cluster_link(source, target):
+    sl, tl, vl = [], [], []
+    for ti, taac in enumerate(target):
+        taa_set = set(taac)
+        aac_len = len(taac)
+        for si, saac in enumerate(source):
+            intersect = taa_set & set(saac)
+            if intersect:
+                sl.append(si)
+                tl.append(ti)
+                vl.append(len(intersect))
+                aac_len -= len(intersect)
+            if aac_len == 0:
+                break
+    return sl, tl, vl 
+
+def type_link(clusters):
+    base_idx = 0    
+    source_idx, target_idx, values = [], [], []
+    for i in range(len(clusters)-1):
+        sl, tl, vl = cluster_link(clusters[i], clusters[i+1])
+        sidx = [i+base_idx for i in sl]
+        base_idx += len(clusters[i])
+        tidx = [i+base_idx for i in tl]
+        source_idx.extend(sidx)
+        target_idx.extend(tidx)
+        values.extend(vl)
+    return source_idx, target_idx, values
+
+def plot_sankey(out, clusters, title):
+    source_idx, target_idx, values = type_link(clusters)
+    labels = list(chain(*clusters))
+    draw.sankey(labels, source_idx, target_idx, values, out, title)
