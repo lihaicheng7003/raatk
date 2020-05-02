@@ -28,11 +28,11 @@ $ ./demo.sh
 - [result visualization](#sc-plot) 
 - [ROC evaluation](#sc-roc)
 - [feature selection](#sc-ifs) 
-- [train model](https://github.com/huang-sh/raatk/wiki#train) 
-- [prediction](https://github.com/huang-sh/raatk/wiki#predict) 
-- [feature selection](https://github.com/huang-sh/raatk/wiki#ifs) 
-- [hyper-parameter optimization](https://github.com/huang-sh/raatk/wiki#-hpo) 
-- [split data](https://github.com/huang-sh/raatk/wiki#split)
+- [high-dimensional feature visualization](#sc-fv)
+- [train model](#sc-train) 
+- [prediction](#sc-predict) 
+- [split data](#sc-split)
+- [transfer format](#sc-transfer)
 
 ------------
 Command
@@ -147,3 +147,37 @@ $raatk ifs k3/type2/10-ARNCQHIFPW.csv -s 2 -clf svm -cv 5 -c 2 -g 0.5 -o ifs
 ```
 output:
 <img src="./img/ifs.png" alt="roc" style="zoom:75%;" />
+### <a name="sc-fv">fv</a>
+high-dimensional feature reduction and visualization
+``` bash
+$raatk fv ifs_best.csv -o ifs-fv
+```
+<img src="./img/fv.png" alt="fv" style="zoom:75%;" />
+
+### <a name="sc-train">train</a>
+
+train a classifier for prediction
+``` bash
+$raatk train ifs_best.csv -clf svm -c 2 -g 0.5 -o svm.model -prob
+```
+### <a name="sc-predict">predict</a>
+predict new data using trained model. The new data must be feature file without label and feature extract parameter must be same as training feature.
+``` bash
+$raatk predict new_data.csv -m svm.model -o 'test-result.csv'
+```
+### <a name="sc-split">split</a>
+split feature data  into train and test subsets
+``` bash
+$raatk split ifs_best.csv -ts 0.3 -o test_split.csv
+```
+### <a name="sc-transfer">transfer</a>
+transfer csv to arff for Weka.
+``` bash
+$raatk transfer ifs_best.csv -fmt arff
+```
+------------
+
+
+Contact
+------------
+If you have any problem, contact me with hsh-me@outlook.com.
