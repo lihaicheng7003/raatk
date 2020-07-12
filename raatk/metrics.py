@@ -79,7 +79,8 @@ def cv_roc_curve_plot(clf, x, y, cv):
            title="Receiver operating characteristic")
     ax.legend(loc="lower right")
     name =  clf.__class__.__name__
-    viz = RocCurveDisplay(mean_fpr, mean_tpr, mean_auc, name)
+    viz = RocCurveDisplay(fpr=mean_fpr, tpr=mean_tpr,
+                            roc_auc=mean_auc, estimator_name=name)
     return viz
 
 def loo_roc_curve_plot(clf, x, y):
@@ -97,7 +98,8 @@ def loo_roc_curve_plot(clf, x, y):
     ax = plt.figure().gca()
     ax.plot([0, 1], [0, 1], linestyle='--', lw=2, color='r',
                         label='Chance', alpha=.8)
-    viz = RocCurveDisplay(fpr, tpr, roc_auc, name)
+    viz = RocCurveDisplay(fpr=fpr, tpr=tpr, 
+                        roc_auc=roc_auc, estimator_name=name)
     return viz.plot(name=name, ax=ax)
 
 def roc_curve_plot(clf, x, y):
@@ -105,5 +107,6 @@ def roc_curve_plot(clf, x, y):
     fpr, tpr, _ = roc_curve(y, y_prob)
     roc_auc = auc(fpr, tpr)
     name =  clf.__class__.__name__
-    viz = RocCurveDisplay(fpr, tpr, roc_auc, name)
+    viz = RocCurveDisplay(fpr=fpr, tpr=tpr, 
+                        roc_auc=roc_auc, estimator_name=name)
     return viz.plot(name=name)
