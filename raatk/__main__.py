@@ -123,12 +123,12 @@ def sub_extract(args):
             if args.index:
                 fea_idx = np.genfromtxt(args.index, delimiter='\n').astype(int)
                 xy = xy[:, fea_idx]
-                aa_ls = [aa_ls[i] for i in fea_idx]
+                new_aa_ls = [aa_ls[i] for i in fea_idx]
             if args.label_f:
                 y = np.array([[idx]]*xy.shape[0])
                 xy = np.hstack([y, xy])
             xy_ls.append(xy)
-        aa_ls.insert(0, 'label') if args.label_f else 0
+        new_aa_ls.insert(0, 'label') if args.label_f else 0
         header = ','.join(aa_ls)
         if args.merge:
             out = args.output[0]
