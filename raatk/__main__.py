@@ -120,6 +120,7 @@ def sub_extract(args):
         for idx, file in enumerate(args.file):
             feature_file = Path(file)
             xy = ul.extract_feature(feature_file, raa, k, gap, lam, count=iscount)
+            new_aa_ls = aa_ls
             if args.index:
                 fea_idx = np.genfromtxt(args.index, delimiter='\n').astype(int)
                 xy = xy[:, fea_idx]
