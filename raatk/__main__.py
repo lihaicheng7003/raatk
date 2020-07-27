@@ -122,7 +122,8 @@ def sub_extract(args):
             xy = ul.extract_feature(feature_file, raa, k, gap, lam, count=iscount)
             new_aa_ls = aa_ls
             if args.index:
-                fea_idx = np.genfromtxt(args.index, delimiter='\n').astype(int)
+                _, (fea_idx, _) = ul.load_data(args.index, normal=False, label_exist=False)
+                fea_idx = fea_idx.astype(int).flatten()
                 xy = xy[:, fea_idx]
                 new_aa_ls = [aa_ls[i] for i in fea_idx]
             if args.label_f:
@@ -130,7 +131,7 @@ def sub_extract(args):
                 xy = np.hstack([y, xy])
             xy_ls.append(xy)
         new_aa_ls.insert(0, 'label') if args.label_f else 0
-        header = ','.join(aa_ls)
+        header = ','.join(new_aa_ls)
         if args.merge:
             out = args.output[0]
             seq_mtx = np.vstack(xy_ls)
@@ -351,13 +352,16 @@ def sub_ifs(args):
             best_n = x.shape[1] if max_acc==acc_ls[-1] else acc_ls.index(max_acc)*step
             draw.p_fs(x_tricks, acc_ls, out + '.png', max_acc=max_acc, best_n=best_n)
             best_x = x[:, sort_idx[:best_n]]
-            best_file =  out + '_best.csv'
+            best_file =  f"{out}_{best_n}-best.csv"
             header = ','.join([names[0]]+[names[i+1] for i in sort_idx[:best_n]])
             ul.write_array(best_file, y.reshape(-1, 1), best_x, header=header)
             xtricks_arr = np.array(x_tricks[:len(acc_ls)]).reshape(-1, 1)
             acc_arr = np.array(acc_ls).reshape(-1, 1)
             ul.write_array(out+".csv", xtricks_arr, acc_arr)
-            ul.write_array(out+f"-{best_n}-idx.csv", sort_idx[:best_n])
+            best_idx = np.array(sort_idx[:best_n]).reshape(1, -1)
+            idx_aa = [f"{i}-{names[idx+1]}" for i,idx in enumerate(best_idx.flatten())]
+            header = ','.join(idx_aa)
+            ul.write_array(out+f"-{best_n}-idx.csv", best_idx, header=header)
             
 def parse_ifs(args, sub_parser):
     parser = sub_parser.add_parser('ifs', add_help=False, prog='raatk ifs',
