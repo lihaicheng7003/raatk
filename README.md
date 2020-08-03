@@ -1,6 +1,9 @@
 # RAATK
 
-RAATK: A Python-based reduce amino acid toolkit of machine learning for protein sequence level inference
+RAATK: A Python-based reduce amino acid toolkit of machine learning for protein sequence level inference.
+
+- [User Manual](https://github.com/huang-sh/raatk/wiki/User-manual)
+- [用户手册](https://github.com/huang-sh/raatk/wiki/%E7%94%A8%E6%88%B7%E6%89%8B%E5%86%8C)
 
 Installation
 ------------
