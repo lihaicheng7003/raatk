@@ -175,7 +175,7 @@ def svm_hpo_param_parser(parser):
                      help='regularization parameter format: [start stop [number]]')
     svm.add_argument('-g', '--gamma_range', nargs="+", type=int,
                      help='kernel coefficient,format: [start stop [number]]')
-    svm.add_argument('-k', '--kernel', choices=['rbf', 'linear'], default=['rbf'],
+    svm.add_argument('-k', '--kernel', nargs="+", choices=['rbf', 'linear'], default=['rbf'],
                     help='specifies the kernel type to be used in the algorithm')
 
 #TODO
