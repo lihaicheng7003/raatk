@@ -67,14 +67,13 @@ def cv_roc_curve_plot(clf, x, y, cv):
     mean_tpr[-1] = 1.0
     mean_auc = auc(mean_fpr, mean_tpr)
     std_auc = np.std(aucs)
-    ax.plot(mean_fpr, mean_tpr, color='b',
-            label=r'Mean ROC (AUC = %0.2f $\pm$ %0.2f)' % (mean_auc, std_auc),
-            lw=2, alpha=.8)
+    ax.plot(mean_fpr, mean_tpr, color='b', lw=2, alpha=.8,
+            label=r'Mean ROC (AUC = %0.4f)' % mean_auc)
     std_tpr = np.std(tprs, axis=0)
     tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
     tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
     ax.fill_between(mean_fpr, tprs_lower, tprs_upper, color='grey', alpha=.2,
-                    label=r'$\pm$ 1 std. dev.')
+                    label=r'$\pm$ %0.2f std. dev.' % std_auc)
     ax.set(xlim=[-0.05, 1.05], ylim=[-0.05, 1.05],
            title="Receiver operating characteristic")
     ax.legend(loc="lower right")

@@ -322,11 +322,11 @@ def split_data(file, test_size):
     data_train, data_test = train_test_split(data, test_size=test_size, random_state=1)
     return data_train, data_test, names
     
-def param_grid(c, g):
+def param_grid(c, g, kernel):
     c_range = np.logspace(*c, base=2)
     gamma_range = np.logspace(*g, base=2)
-    params = [{'kernel': ["rbf"], 'C': c_range,
-                    'gamma': gamma_range}]
+    params = [{'kernel': kernel, 'C': c_range,
+                'gamma': gamma_range}]
     return params
 
 def mean_metric(cv_metric_dic):
@@ -371,7 +371,7 @@ def roc_auc_save(clf, x, y, cv, fmt, out):
         fpr = viz.fpr.reshape(-1, 1)
         tpr = viz.fpr.reshape(-1, 1)
         auc = viz.roc_auc
-        write_array(f"{out}-{auc:.2f}.csv", fpr, tpr)
+        write_array(f"{out}-{auc:.4f}.csv", fpr, tpr)
     else:
         plt.savefig(f"{out}.{fmt}", dpi=1000)
 

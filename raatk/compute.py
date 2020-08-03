@@ -21,17 +21,14 @@ except ImportError:
 
 np.seterr(all='ignore')
 
-def grid_search1(clf):
-    grid = GridSearchCV(SVC(random_state=1), cv=5, n_jobs=-1, param_grid=param_grid)
 
-
-
-def grid_search(x, y, param_grid):
-    grid = GridSearchCV(SVC(random_state=1), cv=5, n_jobs=-1, param_grid=param_grid)
+def grid_search(x, y, param_grid, n_jobs):
+    grid = GridSearchCV(SVC(random_state=1), cv=5, n_jobs=n_jobs, param_grid=param_grid)
     clf = grid.fit(x, y)
     C, gamma = clf.best_params_['C'], clf.best_params_['gamma']
-    return C, gamma
-    
+    kernel = clf.best_params_['kernel']
+    return C, gamma, kernel
+
 def train(x, y, clf, out):
     model = clf.fit(x, y)
     joblib.dump(model, out)

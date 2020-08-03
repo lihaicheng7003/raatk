@@ -164,45 +164,34 @@ def parse_extract(args, sub_parser):
     extract_args.func(extract_args)
 
 def sub_hpo(args):
-    pass
-    # a(**dict(args._get_kwargs()))
-    # params = ul.param_grid(args.C, args.gamma)
-    # x, y = ul.load_data(args.file, normal=True)
-    # best_c, best_gamma = cp.grid_search(x, y, params)
-    # print("C: %s, gamma: %s" % (best_c, best_gamma))
+    params = ul.param_grid(args.C_range, args.gamma_range, args.kernel)
+    _, (x, y) = ul.load_data(args.file)
+    C, gamma, kernel = cp.grid_search(x, y, params, args.n_jobs)
+    print(f"C: {C}, gamma: {gamma}, kernel: {kernel}")
+
+def svm_hpo_param_parser(parser):
+    svm = parser.add_argument_group('SVM', description='Parameters for SVM classifier')
+    svm.add_argument('-c', '--C_range', nargs="+", type=int,
+                     help='regularization parameter format: [start stop [number]]')
+    svm.add_argument('-g', '--gamma_range', nargs="+", type=int,
+                     help='kernel coefficient,format: [start stop [number]]')
+    svm.add_argument('-k', '--kernel', choices=['rbf', 'linear'], default=['rbf'],
+                    help='specifies the kernel type to be used in the algorithm')
 
 #TODO
 def parse_hpo(args, sub_parser):
-    parser = sub_parser.add_parser('hpo', add_help=False, prog='raatk hpo')
+    parser = sub_parser.add_parser('hpo', add_help=False, prog='raatk hpo',
+                                     conflict_handler='resolve')
     parser.add_argument('-h', '--help', action='help')
     parser.add_argument('file', help='feature file for hpyper-parameter optimization')
-    parser.add_argument('-clf', '--clf', default='svm', choices=['svm', 'rbf', 'knn'],
-                                    help='classifier selection')
-    parser.add_argument('-jobs','--n_jobs', type=int, help='the number of parallel jobs to run')
-
-    # knn = parser.add_argument_group('KNN', description='K-nearest neighbors classifier')
-    # knn.add_argument('--n_neighbors', type=int, nargs='+',
-    #                     help='number of neighbors [start stop step]')
-    # knn.add_argument('--weights', choices=['uniform', 'distance'], default=['uniform'], 
-    #                     nargs='+', help='weight function used in prediction') 
-    # knn.add_argument('--algorithm', choices=['auto', 'ball_tree', 'kd_tree', 'brute'], nargs='+',
-    #                     default=['auto'], help='algorithm used to compute the nearest neighbors')
-    # knn.add_argument('--leaf_size', type=int, default=30,
-    #                     help='leaf size passed to BallTree or KDTree')
-
-    # svm = parser.add_argument_group('SVM', description='Parameters for SVM classifier')
-    # svm.add_argument('-c', '--C-range',  nargs='+', type=int,
-    #                         help='regularization parameter value range [start, stop, [num]]')
-    # svm.add_argument('-g', '--gamma-range', nargs='+', type=int,
-    #                         help='Kernel coefficient value range [start, stop, [num]]')
-    # svm.add_argument('--kernel', nargs='+', choices=['rbf', 'linear'],
-    #                         help='kernel function')
-    
+    parser.add_argument('-clf', '--clf', default='svm', choices=['svm'],
+                                    help='classifier selection, default=svm')
+    parser.add_argument('-jobs','--n_jobs', type=int, default=1,
+                        help='number of parallel jobs to run, default=1')
+    svm_hpo_param_parser(parser)
     parser.set_defaults(func=sub_hpo)
-    args.n_jobs = 233
-    print(args.n_jobs)
-    # hpo_args = parser.parse_args(args)
-    # hpo_args.func(hpo_args)
+    hpo_args = parser.parse_args(args)
+    hpo_args.func(hpo_args)
 
 def clf_parser(parser):
     svm = parser.add_argument_group('SVM', description='Parameters for SVM classifier')
