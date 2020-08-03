@@ -98,7 +98,7 @@ def parse_reduce(args, sub_parser):
     parser_r.add_argument('-s', '--size', nargs='+', help='reduce size')
     parser_r.add_argument('-c', '--cluster', help='customized cluster')
     parser_r.add_argument('-naa', action='store_true', help='natural amino acid')
-    parser_r.add_argument('-o', '--output', nargs='+', help='output file or directory')
+    parser_r.add_argument('-o', '--output', nargs='+', help='output path')
     parser_r.set_defaults(func=sub_reduce)
     reduce_args = parser_r.parse_args(args)
     reduce_args.func(reduce_args)
@@ -147,15 +147,16 @@ def parse_extract(args, sub_parser):
     parser_ex.add_argument('-d', '--directory', action='store_true', help='feature directory')
     parser_ex.add_argument('-k', '--kmer', type=int, choices=[1,2,3], 
                           required=True, help='K-tuple or k-mer value')
-    parser_ex.add_argument('-g', '--gap', type=int, default=0, help='gap value')
+    parser_ex.add_argument('-g', '--gap', type=int, default=0, help='gap value, default=0')
     parser_ex.add_argument('-l', '--lam', type=int, default=0, 
-                          help='lambda-correlation value')
-    parser_ex.add_argument('-raa', help='reduced amino acid cluster', default="ACDEFGHIKLMNPQRSTVWY")
+                          help='lambda-correlation value, default=0')
+    parser_ex.add_argument('-raa', help='reduced amino acid cluster, default=ACDEFGHIKLMNPQRSTVWY',
+                            default="ACDEFGHIKLMNPQRSTVWY")
     parser_ex.add_argument('-idx', '--index', default=None, help='feature index')
     parser_ex.add_argument('-m', '--merge', action='store_true', help='merge feature files into one')
-    parser_ex.add_argument('-o', '--output', nargs='+', required=True, help='output directory')
+    parser_ex.add_argument('-o', '--output', nargs='+', required=True, help='output path')
     parser_ex.add_argument('-p', '--process',type=int, choices=list([i for i in range(1, os.cpu_count())]),
-                                 default=1, help='cpu number')
+                                 default=1, help='cpu number, default=1')
     parser_ex.add_argument('--label-f', action='store_false', help='feature label')
     parser_ex.add_argument('--count', action='store_true', help='feature count')
     parser_ex.set_defaults(func=sub_extract)
@@ -205,35 +206,35 @@ def parse_hpo(args, sub_parser):
 
 def clf_parser(parser):
     svm = parser.add_argument_group('SVM', description='Parameters for SVM classifier')
-    svm.add_argument('-c', '--C', default=1, type=float, help='regularization parameter')
-    svm.add_argument('-g', '--gamma', default='scale', help='kernel coefficient')
+    svm.add_argument('-c', '--C', default=1, type=float, help='regularization parameter, default=1')
+    svm.add_argument('-g', '--gamma', default='scale', help='kernel coefficient, default=scale')
     svm.add_argument('-prob', '--probability', action='store_true', help='kernel coefficient')
     svm.add_argument('-k', '--kernel', choices=['rbf', 'linear'], default='rbf',
-                            help='specifies the kernel type to be used in the algorithm ')  
+                    help='specifies the kernel type to be used in the algorithm, default=rbf ')  
     svm.add_argument('-dfs', '--decision_function_shape', default='ovo', choices=['ovr', 'ovo'], 
-                            help='decision function shape')
+                    help='decision function shape, default=ovo')
     svm.add_argument('--class_weight', default='balanced', choices=['balanced'],
-                                help='default: balanced')
-    svm.add_argument('-rs', '--random_state', type=int, default=1, help='random state')
+                    help='class weight, default=balanced')
+    svm.add_argument('-rs', '--random_state', type=int, default=1, help='random state, default=1')
     knn = parser.add_argument_group('KNN', description='K-nearest neighbors classifier')
     knn.add_argument('-n', '--n_neighbors', type=int, default=5,
-                        help='number of neighbors to use by default for kneighbors queries')
+                    help='number of neighbors to use by default for kneighbors queries, default=5')
     knn.add_argument('-w', '--weights', choices=['uniform', 'distance'], default='uniform', 
-                        help='weight function used in prediction') 
+                    help='weight function used in prediction, default=uniform') 
     knn.add_argument('-al', '--algorithm', choices=['auto', 'ball_tree', 'kd_tree', 'brute'], 
-                        default='auto', help='algorithm used to compute the nearest neighbors')
+                    default='auto', help='algorithm used to compute the nearest neighbors,default=auto')
     knn.add_argument('-lfs', '--leaf_size', type=int, default=30,
-                        help='leaf size passed to BallTree or KDTree')
+                    help='leaf size passed to BallTree or KDTree, default=30')
     knn.add_argument('-jobs','--n_jobs', type=int, default=1, 
-                            help='the number of parallel jobs to run for neighbors search')
+                    help='the number of parallel jobs to run for neighbors search, default=1')
     rf = parser.add_argument_group('RF', description='Parameters for random forest classifier') 
     rf.add_argument('-trees', '--n_estimators', type=int, default=100,
-                        help='the number of trees in the forest')
+                        help='the number of trees in the forest, default=100')
     rf.add_argument('-features', '--max_features', default='auto',
-                        help='the number of features to consider when looking for the best split') 
+                    help='the number of features to consider when looking for the best split,default=auto') 
     knn.add_argument('-jobs','--n_jobs', type=int, default=1, 
-                            help='the number of jobs to run in parallel')
-    rf.add_argument('-rs', '--random_state', type=int, default=1, help='random state')
+                            help='the number of jobs to run in parallel, default=1')
+    rf.add_argument('-rs', '--random_state', type=int, default=1, help='random state,default=1')
     return parser
 
 def sub_train(args):
@@ -247,10 +248,10 @@ def parse_train(args, sub_parser):
     parser.add_argument('-h', '--help', action='help')
     parser.add_argument('file', help='feature file to train')
     parser.add_argument('-clf', '--clf', default='svm', choices=['svm', 'rbf', 'knn'],
-                                help='classifier selection')
-    parser.add_argument('-o', '--output',required=True, help='output directory')
+                                help='classifier selection, default=svm')
+    parser.add_argument('-o', '--output',required=True, help='output path')
     parser.add_argument('-jobs','--n_jobs', type=int, default=1, 
-                            help='the number of parallel jobs to run')
+                            help='the number of parallel jobs to run,default=1')
     clf_parser(parser)
     parser.set_defaults(func=sub_train)
     train_args = parser.parse_args(args)
@@ -268,9 +269,9 @@ def sub_predict(args):
 def parse_predict(args, sub_parser):
     parser = sub_parser.add_parser('predict', add_help=False, prog='raatk predict')
     parser.add_argument('-h', '--help', action='help')
-    parser.add_argument('file', help='feature file to predict')
-    parser.add_argument('-m', '--model', required=True, help='model to predict')
-    parser.add_argument('-o', '--output', required=True, help='output directory')
+    parser.add_argument('file', help='feature file without label')
+    parser.add_argument('-m', '--model', required=True, help='model for prediction')
+    parser.add_argument('-o', '--output', required=True, help='output')
     parser.set_defaults(func=sub_predict)
     predict_args = parser.parse_args(args)
     predict_args.func(predict_args)
@@ -286,7 +287,6 @@ def sub_eval(args):
         _, (x, y) = ul.load_data(args.file)
         metric_dic = cp.evaluate(x, y, args.cv, clf)
         ul.save_report(metric_dic, args.output + '.txt')
-        # ul.k_roc_curve_plot(metric_dic['y_true'], metric_dic['y_prob'], args.output + '.png')       
 
 def parse_eval(args, sub_parser):
     parser = sub_parser.add_parser('eval', add_help=False, prog='raatk eval',
@@ -295,11 +295,11 @@ def parse_eval(args, sub_parser):
     parser.add_argument('file', help='feature file to evaluate')
     parser.add_argument('-d', '--directory', action='store_true', help='feature directory to evaluate')
     parser.add_argument('-clf', '--clf', choices=['svm', 'rf', 'knn'], default='svm', 
-                                help='classifier selection')
-    parser.add_argument('-cv', type=int, default=5, help='cross validation fold')
-    parser.add_argument('-o', '--output', required=True, help='output directory')
+                                help='classifier selection, default=svm')
+    parser.add_argument('-cv', type=int, default=5, help='cross validation fold, default=5')
+    parser.add_argument('-o', '--output', required=True, help='output path')
     parser.add_argument('-p', '--process',type=int, choices=list([i for i in range(1, os.cpu_count())]),
-                                 default=1, help='cpu numbers')     
+                                 default=1, help='cpu number, default=1')     
     clf_parser(parser)
     parser.set_defaults(func=sub_eval)
     eval_args = parser.parse_args(args)
@@ -319,16 +319,16 @@ def parse_roc(args, sub_parser):
     parser = sub_parser.add_parser('roc', add_help=False, prog='raatk roc',
                                         conflict_handler='resolve')
     parser.add_argument('-h', '--help', action='help')
-    parser.add_argument('file', help='feature file for roc')
-    parser.add_argument('-cv', type=int, default=5, help='cross validation fold')
+    parser.add_argument('file', help='feature file for ROC')
+    parser.add_argument('-cv', type=int, default=5, help='cross validation fold, default=5')
     me_group = parser.add_mutually_exclusive_group()
     me_group.add_argument('-m', '--model', help='model')
     me_group.add_argument('-clf', '--clf', choices=['svm', 'rf', 'knn'], default='svm',
-                                help='classifier selection')
+                                help='classifier selection, default=svm')
     fmt_choices = ['eps', 'pdf', 'png', 'ps', 'raw', 'rgba', 'svg', 'txt']
     parser.add_argument('-fmt', '--format', default="png",
-                            choices=fmt_choices, help='figure format')
-    parser.add_argument('-o', '--output', required=True, help='output directory')
+                            choices=fmt_choices, help='figure format,default=png')
+    parser.add_argument('-o', '--output', required=True, help='output path')
     clf_parser(parser)
     parser.set_defaults(func=sub_roc)
     roc_args = parser.parse_args(args)
@@ -368,14 +368,14 @@ def parse_ifs(args, sub_parser):
                                         conflict_handler='resolve')
     parser.add_argument('-h', '--help', action='help')
     parser.add_argument('file', nargs='+', help='feature file')
-    parser.add_argument('-s', '--step', default=10, type=int, help='feature file')
+    parser.add_argument('-s', '--step', default=10, type=int, help='feature file, default=10')
     parser.add_argument('-clf', '--clf', default='svm', choices=['svm', 'rf', 'knn'],
-                             help='classifier selection')
-    parser.add_argument('-cv', '--cv', type=int, default=5, help='cross validation fold')                             
-    parser.add_argument('-o', '--output', nargs='+', required=True, help='output folder')
+                             help='classifier selection, default=svm')
+    parser.add_argument('-cv', '--cv', type=int, default=5, help='cross validation fold,default=5')                          
+    parser.add_argument('-o', '--output', nargs='+', required=True, help='output basename')
     parser.add_argument('-mix', action='store_true', help='feature mix')
     parser.add_argument('-p', '--process', type=int, choices=range(1, os.cpu_count()),
-                                 default=1, help='cpu core number')
+                                 default=1, help='cpu core number, default=1')
     clf_parser(parser)
     parser.set_defaults(func=sub_ifs)
     ifs_args = parser.parse_args(args)
@@ -393,7 +393,7 @@ def parse_plot(args, sub_parser):
     parser.add_argument('file', help='the result json file')
     fmt_choices = ['eps', 'pdf', 'png', 'ps', 'raw', 'rgba', 'svg']
     parser.add_argument('-fmt', '--format', default="png",
-                            choices=fmt_choices, help='figure format')
+                            choices=fmt_choices, help='figure format, default=1')
     # parser.add_argument('-dpi', default=1000, type=int, help='figure format')
     parser.add_argument('-o', '--outdir', required=True, help='output directory')
     parser.set_defaults(func=sub_plot)
@@ -461,7 +461,7 @@ def parse_split(args, sub_parser):
     parser.add_argument('-h', '--help', action='help')
     parser.add_argument('file', help='file path')
     parser.add_argument('-ts', '--testsize', type=float, help='test size')
-    parser.add_argument('-o', '--output', help='output file')
+    parser.add_argument('-o', '--output', help='output basename')
     parser.set_defaults(func=sub_split)
     split_args = parser.parse_args(args)
     split_args.func(split_args)
@@ -476,7 +476,7 @@ def parse_transfer(args, sub_parser):
     parser.add_argument('-h', '--help', action='help')
     parser.add_argument('file', nargs='+', help='file path')
     parser.add_argument('-fmt', '--format', choices=['arff'], default='arff',
-                         help='file path')
+                         help='format to transfer, default=arff')
     parser.set_defaults(func=sub_transfer)
     transfer_args = parser.parse_args(args)
     transfer_args.func(transfer_args)
