@@ -4,14 +4,13 @@ RAATK: A Python-based reduce amino acid toolkit of machine learning for protein 
 
 Installation
 ------------
-```
-$ pip install raatk
-```
-
-or
-
+It is recommended to use pip for installation from github.
 ``` 
 $ pip install git+https://github.com/huang-sh/raatk.git@master -U
+```
+or
+```
+$pip install raatk
 ```
 All commands within paper can be tested by running demo.sh in demo directory after installing RAATK
 ```
@@ -28,7 +27,6 @@ $ ./demo.sh
 - [result visualization](#sc-plot) 
 - [ROC evaluation](#sc-roc)
 - [feature selection](#sc-ifs) 
-- [high-dimensional feature visualization](#sc-fv)
 - [train model](#sc-train) 
 - [prediction](#sc-predict) 
 - [split data](#sc-split)
@@ -147,12 +145,6 @@ $raatk ifs k3/type2/10-ARNCQHIFPW.csv -s 2 -clf svm -cv 5 -c 2 -g 0.5 -o ifs
 ```
 output:
 <img src="./img/ifs.png" alt="roc" style="zoom:75%;" />
-### <a name="sc-fv">fv</a>
-high-dimensional feature reduction and visualization
-``` bash
-$raatk fv ifs_best.csv -o ifs-fv
-```
-<img src="./img/fv.png" alt="fv" style="zoom:75%;" />
 
 ### <a name="sc-train">train</a>
 
