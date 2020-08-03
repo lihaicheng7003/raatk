@@ -10,11 +10,11 @@ setup(name='raatk',
     license='BSD 2-Clause',
     packages=['raatk'],
     install_requires=[
-        'numpy=1.18.2',
-        'matplotlib=3.2.1',
-        'scikit-learn=0.22.1',
-        'seaborn=0.10.0',
-        'plotly=4.8.2'
+        'numpy==1.18.2',
+        'matplotlib==3.2.1',
+        'scikit-learn==0.22.1',
+        'seaborn==0.10.0',
+        'plotly==4.8.2'
         ],
     entry_points={
         'console_scripts': [
