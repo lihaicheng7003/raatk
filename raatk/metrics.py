@@ -73,7 +73,7 @@ def cv_roc_curve_plot(clf, x, y, cv):
     tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
     tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
     ax.fill_between(mean_fpr, tprs_lower, tprs_upper, color='grey', alpha=.2,
-                    label=r'$\pm$ %0.2f std. dev.' % std_auc)
+                    label=r'$\pm$ %0.4f std. dev.' % std_auc)
     ax.set(xlim=[-0.05, 1.05], ylim=[-0.05, 1.05],
            title="Receiver operating characteristic")
     ax.legend(loc="lower right")
